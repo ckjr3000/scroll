@@ -14,7 +14,7 @@ startButton.addEventListener('click', () => {
 function initialiseWhiteNoise() {
     const numChannels = 2;
     const sampleRate = ctx.sampleRate;
-    const duration = 2; // in seconds
+    const duration = 2;
     const numFrames = sampleRate * duration;
 
     const buffer = ctx.createBuffer(numChannels, numFrames, sampleRate);
@@ -49,6 +49,7 @@ playButton.addEventListener('click', () => {
 const stopButton = document.getElementById('stop-btn');
 stopButton.addEventListener('click', () => {
     gainNode.gain.setValueAtTime(0, ctx.currentTime);
+    stopWobble();
 })
 
 
@@ -58,3 +59,25 @@ volCtrl.addEventListener('change', (e) => {
     gainVal = newGain;
     gainNode.gain.setValueAtTime(gainVal, ctx.currentTime);
 })
+
+const wobbleGain = document.getElementById('wobble-gain');
+
+let wobbleInterval;
+let wobbleActive = false;
+wobbleGain.addEventListener('click', () => {
+    if(!wobbleActive){
+        wobbleActive = true;
+        clearInterval(wobbleInterval);
+        wobbleInterval = setInterval(() => {
+            let randomGain = Math.random();
+            gainNode.gain.setValueAtTime(randomGain, ctx.currentTime);
+        }, 100);
+    } else {
+        gainNode.gain.setValueAtTime(gainVal, ctx.currentTime);
+    }
+});
+
+function stopWobble(){
+    clearInterval(wobbleInterval);
+    wobbleActive = false;
+}
