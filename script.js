@@ -53,7 +53,7 @@ stopButton.addEventListener('click', () => {
 })
 
 
-const volCtrl = document.getElementById('volume-ctrl');
+const volCtrl = document.getElementById('vol-ctrl');
 volCtrl.addEventListener('change', (e) => {
     let newGain = e.target.value;
     gainVal = newGain;
@@ -61,23 +61,42 @@ volCtrl.addEventListener('change', (e) => {
 })
 
 const wobbleGain = document.getElementById('wobble-gain');
+wobbleGain.innerText = 'Wobble Gain';
+const intervalSizeInput = document.getElementById('interval-size');
 
 let wobbleInterval;
+let wobbleIntervalSize = 500;
 let wobbleActive = false;
 wobbleGain.addEventListener('click', () => {
     if(!wobbleActive){
-        wobbleActive = true;
-        clearInterval(wobbleInterval);
+        intervalSizeInput.classList.remove('hidden');
+        wobble();
+    } else {
+        gainNode.gain.setValueAtTime(gainVal, ctx.currentTime);
+        stopWobble();
+    }
+});
+
+intervalSizeInput.addEventListener('change', (e) => {
+    let newSize = e.target.value;
+    wobbleIntervalSize = newSize;
+    wobble();
+})
+
+function wobble(){
+    wobbleActive = true;
+    wobbleGain.innerText = 'Stop Wobble';
+    clearInterval(wobbleInterval);
         wobbleInterval = setInterval(() => {
             let randomGain = Math.random();
             gainNode.gain.setValueAtTime(randomGain, ctx.currentTime);
-        }, 100);
-    } else {
-        gainNode.gain.setValueAtTime(gainVal, ctx.currentTime);
-    }
-});
+            console.log(wobbleIntervalSize);
+        }, wobbleIntervalSize);
+}
 
 function stopWobble(){
     clearInterval(wobbleInterval);
     wobbleActive = false;
+    intervalSizeInput.classList.add('hidden');
+    wobbleGain.innerText = 'Wobble Gain';
 }
