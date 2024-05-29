@@ -1,14 +1,12 @@
-const startButton = document.getElementById('start');
-const controls = document.getElementById('controls');
 let ctx;
 let gainNode;
 let gainVal = 0.5;
 
-startButton.addEventListener('click', () => {
+const playButton = document.getElementById('play-btn');
+playButton.addEventListener('click', () => {
     ctx = new AudioContext();
-    startButton.classList.add('hidden');
-    controls.classList.remove('hidden');
     initialiseWhiteNoise();
+    gainNode.gain.setValueAtTime(gainVal, ctx.currentTime);
 })
 
 function initialiseWhiteNoise() {
@@ -31,20 +29,12 @@ function initialiseWhiteNoise() {
     source.loop = true; 
 
     gainNode = ctx.createGain();
-    gainNode.gain.setValueAtTime(0, ctx.currentTime);
 
     source.connect(gainNode);
     gainNode.connect(ctx.destination);
 
     source.start();
 }
-
-
-const playButton = document.getElementById('play-btn');
-playButton.addEventListener('click', () => {
-    gainNode.gain.setValueAtTime(gainVal, ctx.currentTime);
-})
-
 
 const stopButton = document.getElementById('stop-btn');
 stopButton.addEventListener('click', () => {
@@ -90,7 +80,7 @@ function wobble(){
         wobbleInterval = setInterval(() => {
             let randomGain = Math.random();
             gainNode.gain.setValueAtTime(randomGain, ctx.currentTime);
-            console.log(wobbleIntervalSize);
+            volCtrl.value = randomGain; 
         }, wobbleIntervalSize);
 }
 
