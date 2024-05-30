@@ -19,6 +19,10 @@ body {
     background-color: rgb(49, 49, 66);
     margin: 0;
     padding: 5px;
+    position: fixed; /* Make the top-controls fixed */
+    top: 0; /* Stick to the top of the screen */
+    width: 100%; /* Ensure it spans the full width of the screen */
+    z-index: 1000; /* Ensure it stays above other elements */
 }
 
 #top-controls .logo {
@@ -35,6 +39,7 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    margin-top: 60px; /* Add margin to avoid overlap with the fixed header */
 }
 
 .post {
@@ -47,4 +52,5 @@ body {
 
 .post > * {
     width: 40vw;
+    padding: 10px;
 }

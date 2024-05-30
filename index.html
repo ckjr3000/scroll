@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="script.js" defer></script>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="sliders.css">
+    <title>VOID VOID VOID VOID</title>
+</head>
+<body>
+    <div id="top-controls" class="controls">
+        <div class="logo">
+            <svg id="play-btn" width="3vw" height="3vw" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M21.4086 9.35258C23.5305 10.5065 23.5305 13.4935 21.4086 14.6474L8.59662 21.6145C6.53435 22.736 4 21.2763 4 18.9671L4 5.0329C4 2.72368 6.53435 1.26402 8.59661 2.38548L21.4086 9.35258Z" fill="#74A664"/>
+            </svg>
+            <svg id="stop-btn" width="3vw" height="3vw" xmlns="http://www.w3.org/2000/svg">
+                <rect width="2vw" height="2vw" x="10" y="10" rx="0" ry="0" fill="#F72C25" />
+            </svg> 
+        </div>
+        <input id="vol-ctrl" name="vol" type="range" min="0" max="1" step="0.1" default="0.50">
+    </div>
+    <div id="main-controls" class="controls">
+        <div class="post">
+            <img id="pan" src="./assets/void1.gif" alt=""> <br>
+            <input id="pan-val" name="int-sz" type="range" min="-1" max="1" step="0.01" default="0">
+        </div>
+        <div class="post">
+            <img id="stretch" src="./assets/void2.gif" alt=""> <br>
+            <input id="stretch-val" name="int-sz" type="range" min="0.5" max="2" step="0.01" default="0.01">
+        </div>
+        <div class="post">
+            <img id="pitch" src="./assets/void3.gif" alt=""> <br>
+            <input id="pitch-val" name="int-sz" type="range" min="0" max="24000" step="100" default="0">
+        </div>
+        <div class="post">
+            <img id="crush" src="./assets/void4.gif" alt=""> <br>
+            <input id="crush-val" name="int-sz" type="range" min="8" max="16" step="1" default="16">
+        </div>
+    </div>
+</body>
+</html>
