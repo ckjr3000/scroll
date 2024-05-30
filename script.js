@@ -1,12 +1,13 @@
 let ctx;
-let gainNode;
+let gainNodeLeft, gainNodeRight;
 let gainVal = 0.5;
 
 const playButton = document.getElementById('play-btn');
 playButton.addEventListener('click', () => {
     ctx = new AudioContext();
     initialiseWhiteNoise();
-    gainNode.gain.setValueAtTime(gainVal, ctx.currentTime);
+    gainNodeLeft.gain.setValueAtTime(gainVal, ctx.currentTime);
+    gainNodeRight.gain.setValueAtTime(gainVal, ctx.currentTime);
 })
 
 function initialiseWhiteNoise() {
@@ -26,28 +27,37 @@ function initialiseWhiteNoise() {
 
     const source = ctx.createBufferSource();
     source.buffer = buffer;
-    source.loop = true; 
+    source.loop = true;
 
-    gainNode = ctx.createGain();
+    const splitter = ctx.createChannelSplitter(2);
+    gainNodeLeft = ctx.createGain();
+    gainNodeRight = ctx.createGain();
+    const merger = ctx.createChannelMerger(2);
 
-    source.connect(gainNode);
-    gainNode.connect(ctx.destination);
+    source.connect(splitter);
+    splitter.connect(gainNodeLeft, 0);
+    splitter.connect(gainNodeRight, 1);
+    gainNodeLeft.connect(merger, 0, 0);
+    gainNodeRight.connect(merger, 0, 1);
+
+    merger.connect(ctx.destination);
 
     source.start();
 }
 
 const stopButton = document.getElementById('stop-btn');
 stopButton.addEventListener('click', () => {
-    gainNode.gain.setValueAtTime(0, ctx.currentTime);
+    gainNodeLeft.gain.setValueAtTime(0, ctx.currentTime);
+    gainNodeRight.gain.setValueAtTime(0, ctx.currentTime);
     stopWobble();
 })
-
 
 const volCtrl = document.getElementById('vol-ctrl');
 volCtrl.addEventListener('change', (e) => {
     let newGain = e.target.value;
     gainVal = newGain;
-    gainNode.gain.setValueAtTime(gainVal, ctx.currentTime);
+    gainNodeLeft.gain.setValueAtTime(gainVal, ctx.currentTime);
+    gainNodeRight.gain.setValueAtTime(gainVal, ctx.currentTime);
 })
 
 const wobbleGain = document.getElementById('wobble-gain');
@@ -57,11 +67,12 @@ let wobbleInterval;
 let wobbleIntervalSize = 500;
 let wobbleActive = false;
 wobbleGain.addEventListener('click', () => {
-    if(!wobbleActive){
+    if (!wobbleActive) {
         intervalSizeInput.classList.remove('hidden');
         wobble();
     } else {
-        gainNode.gain.setValueAtTime(gainVal, ctx.currentTime);
+        gainNodeLeft.gain.setValueAtTime(gainVal, ctx.currentTime);
+        gainNodeRight.gain.setValueAtTime(gainVal, ctx.currentTime);
         stopWobble();
     }
 });
@@ -72,18 +83,19 @@ intervalSizeInput.addEventListener('change', (e) => {
     wobble();
 })
 
-function wobble(){
+function wobble() {
     wobbleActive = true;
     wobbleGain.innerText = 'Stop Wobble';
     clearInterval(wobbleInterval);
-        wobbleInterval = setInterval(() => {
-            let randomGain = Math.random();
-            gainNode.gain.setValueAtTime(randomGain, ctx.currentTime);
-            volCtrl.value = randomGain; 
-        }, wobbleIntervalSize);
+    wobbleInterval = setInterval(() => {
+        let randomGain = Math.random();
+        gainNodeLeft.gain.setValueAtTime(randomGain, ctx.currentTime);
+        gainNodeRight.gain.setValueAtTime(randomGain, ctx.currentTime);
+        volCtrl.value = randomGain;
+    }, wobbleIntervalSize);
 }
 
-function stopWobble(){
+function stopWobble() {
     clearInterval(wobbleInterval);
     wobbleActive = false;
     intervalSizeInput.classList.add('hidden');
@@ -91,8 +103,22 @@ function stopWobble(){
 
 const pan = document.getElementById('pan');
 const panValueInput = document.getElementById('pan-val');
-const panValue = 0;
+let panValue = 0;
 
 pan.addEventListener('click', () => {
     panValueInput.classList.remove('hidden');
+})
+
+panValueInput.addEventListener('change', (e) => {
+    panValue = e.target.value;
+    if (panValue == 0) {
+        gainNodeLeft.gain.setValueAtTime(gainVal, ctx.currentTime);
+        gainNodeRight.gain.setValueAtTime(gainVal, ctx.currentTime);
+    } else if (panValue < 0) {
+        gainNodeRight.gain.setValueAtTime(gainVal * (1 + parseFloat(panValue)), ctx.currentTime); // decrease right channel gain
+        gainNodeLeft.gain.setValueAtTime(gainVal, ctx.currentTime);
+    } else {
+        gainNodeLeft.gain.setValueAtTime(gainVal * (1 - parseFloat(panValue)), ctx.currentTime); // decrease left channel gain
+        gainNodeRight.gain.setValueAtTime(gainVal, ctx.currentTime);
+    }
 })
