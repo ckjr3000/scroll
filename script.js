@@ -3,6 +3,8 @@ let source;
 let gainNodeLeft, gainNodeRight;
 let gainVal = 0.5;
 let filterNode;
+let bitcrusherNode;
+let bitDepth = 4;
 
 function initialiseWhiteNoise() {
     const numChannels = 2;
@@ -27,18 +29,23 @@ function initialiseWhiteNoise() {
     gainNodeLeft = ctx.createGain();
     gainNodeRight = ctx.createGain();
     const merger = ctx.createChannelMerger(2);
-    
+
     filterNode = ctx.createBiquadFilter();
     filterNode.type = 'bandpass';
+
+    bitcrusherNode = createBitcrusherNode();
 
     source.connect(splitter);
     splitter.connect(gainNodeLeft, 0);
     splitter.connect(gainNodeRight, 1);
     gainNodeLeft.connect(merger, 0, 0);
     gainNodeRight.connect(merger, 0, 1);
-    
-    merger.connect(filterNode);  // Connect the merger to the filterNode
-    filterNode.connect(ctx.destination);  // Connect the filterNode to the destination
+
+    merger.connect(filterNode);
+
+    filterNode.connect(bitcrusherNode);
+
+    bitcrusherNode.connect(ctx.destination);merger.connect(bitcrusherNode);
 
     source.start();
 }
@@ -159,5 +166,38 @@ pitch.addEventListener('click', () => {
 
 pitchValueInput.addEventListener('change', (e) => {
     pitchValue = e.target.value;
-    filterNode.frequency.setValueAtTime(pitchValue, ctx.currentTime); // Update the filterNode's frequency
+    filterNode.frequency.setValueAtTime(pitchValue, ctx.currentTime);
+})
+
+// bitcrush
+function createBitcrusherNode() {
+    const bufferSize = 4096;
+    const bitcrusherNode = ctx.createScriptProcessor(bufferSize, 2, 2);
+
+    bitcrusherNode.onaudioprocess = function(event) {
+        for (let channel = 0; channel < event.inputBuffer.numberOfChannels; channel++) {
+            const input = event.inputBuffer.getChannelData(channel);
+            const output = event.outputBuffer.getChannelData(channel);
+
+            for (let i = 0; i < input.length; i++) {
+                // Adjust the bit depth reduction factor with a non-linear function
+                let reduction = Math.pow(2, 16 - bitDepth); // Example: inversely scale reduction
+                // Apply non-linear distortion to the audio sample
+                output[i] = Math.sign(input[i]) * (1 - Math.pow(1 - Math.abs(input[i]), reduction));
+            }
+        }
+    };
+
+    return bitcrusherNode;
+}
+
+
+const bitcrush = document.getElementById('crush');
+const bitcrushValueInput = document.getElementById('crush-val');
+bitcrush.addEventListener('click', () => {
+    bitcrushValueInput.classList.remove('hidden');
+})
+
+bitcrushValueInput.addEventListener('change', (e) => {
+    bitDepth = e.target.value;
 })
