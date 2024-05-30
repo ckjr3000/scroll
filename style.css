@@ -3,17 +3,48 @@ html, body {
     padding: 0;
 }
 
+body {
+    background-color: rgb(36, 36, 49);
+}
+
+.hidden {
+    display: none;
+}
+
 #top-controls {
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    background-color: #FEECEE;
+    background-color: rgb(49, 49, 66);
     margin: 0;
-    padding: 0;
+    padding: 5px;
 }
 
-#top-controls button {
-    border: none;
-    background-color: white;
+#top-controls .logo {
+    display: flex;
+    flex-direction: row;
+}
+
+#top-controls input {
+    width: 90vw;
+}
+
+#main-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.post {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 25px 0;
+}
+
+.post > * {
+    width: 40vw;
 }

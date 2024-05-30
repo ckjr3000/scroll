@@ -51,7 +51,6 @@ volCtrl.addEventListener('change', (e) => {
 })
 
 const wobbleGain = document.getElementById('wobble-gain');
-wobbleGain.innerText = 'Wobble Gain';
 const intervalSizeInput = document.getElementById('interval-size');
 
 let wobbleInterval;
@@ -88,5 +87,12 @@ function stopWobble(){
     clearInterval(wobbleInterval);
     wobbleActive = false;
     intervalSizeInput.classList.add('hidden');
-    wobbleGain.innerText = 'Wobble Gain';
 }
+
+const pan = document.getElementById('pan');
+const panValueInput = document.getElementById('pan-val');
+const panValue = 0;
+
+pan.addEventListener('click', () => {
+    panValueInput.classList.remove('hidden');
+})
