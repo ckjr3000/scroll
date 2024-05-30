@@ -6,8 +6,8 @@ let filterNode;
 let bitcrusherNode;
 let bitDepth = 16;
 let stereoPanner;
-let compressor; // Add a compressor node
-let bitcrusherGainNode; // Gain node for bitcrusher compensation
+let compressor;
+let bitcrusherGainNode;
 const audioFilePath = './assets/drones.mp3';
 
 async function initialiseSoundSource(audioFilePath) {
@@ -28,13 +28,11 @@ async function initialiseSoundSource(audioFilePath) {
 
     bitcrusherNode = createBitcrusherNode();
     
-    // Gain node to compensate bitcrusher volume increase
     bitcrusherGainNode = ctx.createGain();
     bitcrusherGainNode.gain.setValueAtTime(1, ctx.currentTime);
 
-    // Initialize the compressor node
     compressor = ctx.createDynamicsCompressor();
-    compressor.threshold.setValueAtTime(-40, ctx.currentTime); // Lower threshold
+    compressor.threshold.setValueAtTime(-40, ctx.currentTime); 
     compressor.knee.setValueAtTime(30, ctx.currentTime);
     compressor.ratio.setValueAtTime(12, ctx.currentTime);
     compressor.attack.setValueAtTime(0.003, ctx.currentTime);
@@ -56,8 +54,8 @@ async function initialiseSoundSource(audioFilePath) {
     merger.connect(stereoPanner);
     stereoPanner.connect(filterNode);
     filterNode.connect(bitcrusherNode);
-    bitcrusherNode.connect(bitcrusherGainNode); // Connect to gain node
-    bitcrusherGainNode.connect(compressor); // Connect gain node to compressor
+    bitcrusherNode.connect(bitcrusherGainNode); 
+    bitcrusherGainNode.connect(compressor); 
     compressor.connect(ctx.destination);
 
     source.start();
@@ -89,13 +87,8 @@ volCtrl.addEventListener('change', (e) => {
 });
 
 // pan
-const pan = document.getElementById('pan');
 const panValueInput = document.getElementById('pan-val');
 let panValue = 0;
-
-pan.addEventListener('click', () => {
-    panValueInput.classList.remove('hidden');
-});
 
 panValueInput.addEventListener('change', (e) => {
     panValue = parseFloat(e.target.value);
@@ -108,13 +101,8 @@ function setPanning(panValue) {
 }
 
 // time stretch
-const stretch = document.getElementById('stretch');
 const stretchValueInput = document.getElementById('stretch-val');
 let stretchValue = 1;
-
-stretch.addEventListener('click', () => {
-    stretchValueInput.classList.remove('hidden');
-});
 
 stretchValueInput.addEventListener('change', (e) => {
     stretchValue = e.target.value;
@@ -122,13 +110,8 @@ stretchValueInput.addEventListener('change', (e) => {
 });
 
 // pitch
-const pitch = document.getElementById('pitch');
 const pitchValueInput = document.getElementById('pitch-val');
 let pitchValue = 20000;
-
-pitch.addEventListener('click', () => {
-    pitchValueInput.classList.remove('hidden');
-});
 
 pitchValueInput.addEventListener('change', (e) => {
     pitchValue = e.target.value;
@@ -155,18 +138,44 @@ function createBitcrusherNode() {
     return bitcrusherNode;
 }
 
-const bitcrush = document.getElementById('crush');
 const bitcrushValueInput = document.getElementById('crush-val');
-bitcrush.addEventListener('click', () => {
-    bitcrushValueInput.classList.remove('hidden');
-});
 
 bitcrushValueInput.addEventListener('change', (e) => {
     bitDepth = e.target.value;
-    // Adjust bitcrusherGainNode based on bitDepth
     if (bitDepth < 16) {
-        bitcrusherGainNode.gain.setValueAtTime(0.5, ctx.currentTime); // Reduce gain when bitcrusher is active
+        bitcrusherGainNode.gain.setValueAtTime(0.5, ctx.currentTime); 
     } else {
-        bitcrusherGainNode.gain.setValueAtTime(1, ctx.currentTime); // Neutral gain when bitcrusher is not active
+        bitcrusherGainNode.gain.setValueAtTime(1, ctx.currentTime);
     }
 });
+
+/// Add key press events
+document.addEventListener('keydown', (e) => {
+    let targetInput;
+    // Determine which input to focus based on the pressed key
+    switch (e.key) {
+        case 'v':
+            targetInput = document.getElementById('vol-ctrl');
+            break;
+        case 'p':
+            targetInput = document.getElementById('pan-val');
+            break;
+        case 't':
+            targetInput = document.getElementById('stretch-val');
+            break;
+        case 'f':
+            targetInput = document.getElementById('pitch-val');
+            break;
+        case 'b':
+            targetInput = document.getElementById('crush-val');
+            break;
+        default:
+            return; // Exit if other keys are pressed
+    }
+    // Focus on the target input if found
+    if (targetInput) {
+        targetInput.focus();
+    }
+});
+
+
