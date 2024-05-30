@@ -83,7 +83,6 @@ volCtrl.addEventListener('change', (e) => {
     gainVal = newGain;
     gainNodeLeft.gain.linearRampToValueAtTime(gainVal, ctx.currentTime + 0.05);
     gainNodeRight.gain.linearRampToValueAtTime(gainVal, ctx.currentTime + 0.05);
-    console.log(gainVal);
 });
 
 // pan
@@ -100,6 +99,26 @@ function setPanning(panValue) {
     stereoPanner.pan.linearRampToValueAtTime(panValue, ctx.currentTime + 0.05);
 }
 
+// randomise pan
+const randPan = document.getElementById('rand-pan');
+let randPanActive = false;
+let panInterval;
+randPan.addEventListener('click', () => {
+    if (!randPanActive) {
+        randPanActive = true;
+        panInterval = setInterval(() => {
+            panValue = Math.random() * 2 - 1;
+            stereoPanner.pan.linearRampToValueAtTime(panValue, ctx.currentTime + 0.05);
+            panValueInput.value = panValue;
+        }, 500);
+    } else {
+        randPanActive = false;
+        clearInterval(panInterval);
+        stereoPanner.pan.linearRampToValueAtTime(0, ctx.currentTime + 0.05); 
+        panValueInput.value = 0; 
+    }
+});
+
 // time stretch
 const stretchValueInput = document.getElementById('stretch-val');
 let stretchValue = 1;
@@ -109,6 +128,26 @@ stretchValueInput.addEventListener('change', (e) => {
     source.playbackRate.linearRampToValueAtTime(stretchValue, ctx.currentTime + 0.05);
 });
 
+// randomise stretch
+const randStretch = document.getElementById('rand-stretch');
+let randStretchActive = false;
+let stretchInterval;
+randStretch.addEventListener('click', () => {
+    if (!randStretchActive) {
+        randStretchActive = true;
+        stretchInterval = setInterval(() => {
+            stretchValue = Math.random() * (2 - 0.5) + 0.5;
+            source.playbackRate.linearRampToValueAtTime(stretchValue, ctx.currentTime + 0.05);
+            stretchValueInput.value = stretchValue;
+        }, 500);
+    } else {
+        randStretchActive = false;
+        clearInterval(stretchInterval);
+        source.playbackRate.linearRampToValueAtTime(stretchValue, ctx.currentTime + 0.05);
+        stretchValueInput.value = 1; 
+    }
+});
+
 // pitch
 const pitchValueInput = document.getElementById('pitch-val');
 let pitchValue = 20000;
@@ -116,6 +155,26 @@ let pitchValue = 20000;
 pitchValueInput.addEventListener('change', (e) => {
     pitchValue = e.target.value;
     filterNode.frequency.linearRampToValueAtTime(pitchValue, ctx.currentTime + 0.05);
+});
+
+// randomise pitch
+const randPitch = document.getElementById('rand-pitch');
+let randPitchActive = false;
+let pitchInterval;
+randPitch.addEventListener('click', () => {
+    if (!randPitchActive) {
+        randPitchActive = true;
+        pitchInterval = setInterval(() => {
+            pitchValue = Math.random() * 24000;
+            filterNode.frequency.linearRampToValueAtTime(pitchValue, ctx.currentTime + 0.05);
+            pitchValueInput.value = pitchValue;
+        }, 500);
+    } else {
+        randPitchActive = false;
+        clearInterval(pitchInterval);
+        filterNode.frequency.linearRampToValueAtTime(pitchValue, ctx.currentTime + 0.05);
+        pitchValueInput.value = pitchValue; 
+    }
 });
 
 // bitcrush
@@ -149,10 +208,28 @@ bitcrushValueInput.addEventListener('change', (e) => {
     }
 });
 
+// randomise crush
+const randCrush = document.getElementById('rand-crush');
+let randCrushActive = false;
+let crushInterval;
+randCrush.addEventListener('click', () => {
+    if (!randCrushActive) {
+        randCrushActive = true;
+        crushInterval = setInterval(() => {
+            bitDepth = Math.random() * (16 - 8) + 8;
+            bitcrushValueInput.value = bitDepth;
+        }, 500);
+    } else {
+        randCrushActive = false;
+        clearInterval(crushInterval);
+        bitDepth = 16;
+        bitcrushValueInput.value = bitDepth; 
+    }
+});
+
 /// Add key press events
 document.addEventListener('keydown', (e) => {
     let targetInput;
-    // Determine which input to focus based on the pressed key
     switch (e.key) {
         case 'v':
             targetInput = document.getElementById('vol-ctrl');
@@ -170,9 +247,8 @@ document.addEventListener('keydown', (e) => {
             targetInput = document.getElementById('crush-val');
             break;
         default:
-            return; // Exit if other keys are pressed
+            return; 
     }
-    // Focus on the target input if found
     if (targetInput) {
         targetInput.focus();
     }
