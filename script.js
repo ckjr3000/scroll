@@ -1,4 +1,5 @@
 let ctx;
+let source;
 let gainNodeLeft, gainNodeRight;
 let gainVal = 0.5;
 
@@ -25,7 +26,7 @@ function initialiseWhiteNoise() {
         }
     }
 
-    const source = ctx.createBufferSource();
+    source = ctx.createBufferSource();
     source.buffer = buffer;
     source.loop = true;
 
@@ -121,4 +122,17 @@ panValueInput.addEventListener('change', (e) => {
         gainNodeLeft.gain.setValueAtTime(gainVal * (1 - parseFloat(panValue)), ctx.currentTime); // decrease left channel gain
         gainNodeRight.gain.setValueAtTime(gainVal, ctx.currentTime);
     }
+})
+
+const stretch = document.getElementById('stretch');
+const stretchValueInput = document.getElementById('stretch-val');
+let stretchValue = 0;
+
+stretch.addEventListener('click', () => {
+    stretchValueInput.classList.remove('hidden');
+})
+
+stretchValueInput.addEventListener('change', (e) => {
+    stretchValue = e.target.value;
+    source.playbackRate.setValueAtTime(stretchValue, ctx.currentTime);
 })
