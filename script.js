@@ -2,14 +2,7 @@ let ctx;
 let source;
 let gainNodeLeft, gainNodeRight;
 let gainVal = 0.5;
-
-const playButton = document.getElementById('play-btn');
-playButton.addEventListener('click', () => {
-    ctx = new AudioContext();
-    initialiseWhiteNoise();
-    gainNodeLeft.gain.setValueAtTime(gainVal, ctx.currentTime);
-    gainNodeRight.gain.setValueAtTime(gainVal, ctx.currentTime);
-})
+let filterNode;
 
 function initialiseWhiteNoise() {
     const numChannels = 2;
@@ -34,18 +27,32 @@ function initialiseWhiteNoise() {
     gainNodeLeft = ctx.createGain();
     gainNodeRight = ctx.createGain();
     const merger = ctx.createChannelMerger(2);
+    
+    filterNode = ctx.createBiquadFilter();
+    filterNode.type = 'bandpass';
 
     source.connect(splitter);
     splitter.connect(gainNodeLeft, 0);
     splitter.connect(gainNodeRight, 1);
     gainNodeLeft.connect(merger, 0, 0);
     gainNodeRight.connect(merger, 0, 1);
-
-    merger.connect(ctx.destination);
+    
+    merger.connect(filterNode);  // Connect the merger to the filterNode
+    filterNode.connect(ctx.destination);  // Connect the filterNode to the destination
 
     source.start();
 }
 
+// play
+const playButton = document.getElementById('play-btn');
+playButton.addEventListener('click', () => {
+    ctx = new AudioContext();
+    initialiseWhiteNoise();
+    gainNodeLeft.gain.setValueAtTime(gainVal, ctx.currentTime);
+    gainNodeRight.gain.setValueAtTime(gainVal, ctx.currentTime);
+})
+
+// stop
 const stopButton = document.getElementById('stop-btn');
 stopButton.addEventListener('click', () => {
     gainNodeLeft.gain.setValueAtTime(0, ctx.currentTime);
@@ -53,6 +60,7 @@ stopButton.addEventListener('click', () => {
     stopWobble();
 })
 
+// master volume
 const volCtrl = document.getElementById('vol-ctrl');
 volCtrl.addEventListener('change', (e) => {
     let newGain = e.target.value;
@@ -61,6 +69,7 @@ volCtrl.addEventListener('change', (e) => {
     gainNodeRight.gain.setValueAtTime(gainVal, ctx.currentTime);
 })
 
+// wobble gain
 const wobbleGain = document.getElementById('wobble-gain');
 const intervalSizeInput = document.getElementById('interval-size');
 
@@ -102,6 +111,7 @@ function stopWobble() {
     intervalSizeInput.classList.add('hidden');
 }
 
+// pan
 const pan = document.getElementById('pan');
 const panValueInput = document.getElementById('pan-val');
 let panValue = 0;
@@ -124,6 +134,7 @@ panValueInput.addEventListener('change', (e) => {
     }
 })
 
+// time stretch
 const stretch = document.getElementById('stretch');
 const stretchValueInput = document.getElementById('stretch-val');
 let stretchValue = 0;
@@ -135,4 +146,18 @@ stretch.addEventListener('click', () => {
 stretchValueInput.addEventListener('change', (e) => {
     stretchValue = e.target.value;
     source.playbackRate.setValueAtTime(stretchValue, ctx.currentTime);
+})
+
+// pitch
+const pitch = document.getElementById('pitch');
+const pitchValueInput = document.getElementById('pitch-val');
+let pitchValue = 0;
+
+pitch.addEventListener('click', () => {
+    pitchValueInput.classList.remove('hidden');
+})
+
+pitchValueInput.addEventListener('change', (e) => {
+    pitchValue = e.target.value;
+    filterNode.frequency.setValueAtTime(pitchValue, ctx.currentTime); // Update the filterNode's frequency
 })
