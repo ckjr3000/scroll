@@ -5,29 +5,23 @@ let gainVal = 0.5;
 let filterNode;
 let bitcrusherNode;
 let bitDepth = 4;
+let stereoPanner;
+const audioFilePath = './assets/16-11-23.wav';
 
-function initialiseWhiteNoise() {
-    const numChannels = 2;
-    const sampleRate = ctx.sampleRate;
-    const duration = 2;
-    const numFrames = sampleRate * duration;
-
-    const buffer = ctx.createBuffer(numChannels, numFrames, sampleRate);
-
-    for (let channel = 0; channel < numChannels; channel++) {
-        const nowBuffering = buffer.getChannelData(channel);
-        for (let i = 0; i < numFrames; i++) {
-            nowBuffering[i] = Math.random() * 2 - 1; 
-        }
-    }
+async function initialiseSoundSource(audioFilePath) {
+    const response = await fetch(audioFilePath);
+    const arrayBuffer = await response.arrayBuffer();
+    const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
 
     source = ctx.createBufferSource();
-    source.buffer = buffer;
+    source.buffer = audioBuffer;
     source.loop = true;
 
     const splitter = ctx.createChannelSplitter(2);
     gainNodeLeft = ctx.createGain();
     gainNodeRight = ctx.createGain();
+    stereoPanner = ctx.createStereoPanner();
+
     const merger = ctx.createChannelMerger(2);
 
     filterNode = ctx.createBiquadFilter();
@@ -41,20 +35,23 @@ function initialiseWhiteNoise() {
     gainNodeLeft.connect(merger, 0, 0);
     gainNodeRight.connect(merger, 0, 1);
 
-    merger.connect(filterNode);
+    merger.connect(stereoPanner);
+
+    stereoPanner.connect(filterNode);
 
     filterNode.connect(bitcrusherNode);
 
-    bitcrusherNode.connect(ctx.destination);merger.connect(bitcrusherNode);
+    bitcrusherNode.connect(ctx.destination);
 
     source.start();
 }
 
+
 // play
 const playButton = document.getElementById('play-btn');
-playButton.addEventListener('click', () => {
+playButton.addEventListener('click', async () => {
     ctx = new AudioContext();
-    initialiseWhiteNoise();
+    await initialiseSoundSource(audioFilePath);
     gainNodeLeft.gain.setValueAtTime(gainVal, ctx.currentTime);
     gainNodeRight.gain.setValueAtTime(gainVal, ctx.currentTime);
 })
@@ -64,7 +61,6 @@ const stopButton = document.getElementById('stop-btn');
 stopButton.addEventListener('click', () => {
     gainNodeLeft.gain.setValueAtTime(0, ctx.currentTime);
     gainNodeRight.gain.setValueAtTime(0, ctx.currentTime);
-    stopWobble();
 })
 
 // master volume
@@ -74,49 +70,8 @@ volCtrl.addEventListener('change', (e) => {
     gainVal = newGain;
     gainNodeLeft.gain.setValueAtTime(gainVal, ctx.currentTime);
     gainNodeRight.gain.setValueAtTime(gainVal, ctx.currentTime);
+    console.log(gainVal);
 })
-
-// wobble gain
-const wobbleGain = document.getElementById('wobble-gain');
-const intervalSizeInput = document.getElementById('interval-size');
-
-let wobbleInterval;
-let wobbleIntervalSize = 500;
-let wobbleActive = false;
-wobbleGain.addEventListener('click', () => {
-    if (!wobbleActive) {
-        intervalSizeInput.classList.remove('hidden');
-        wobble();
-    } else {
-        gainNodeLeft.gain.setValueAtTime(gainVal, ctx.currentTime);
-        gainNodeRight.gain.setValueAtTime(gainVal, ctx.currentTime);
-        stopWobble();
-    }
-});
-
-intervalSizeInput.addEventListener('change', (e) => {
-    let newSize = e.target.value;
-    wobbleIntervalSize = newSize;
-    wobble();
-})
-
-function wobble() {
-    wobbleActive = true;
-    wobbleGain.innerText = 'Stop Wobble';
-    clearInterval(wobbleInterval);
-    wobbleInterval = setInterval(() => {
-        let randomGain = Math.random();
-        gainNodeLeft.gain.setValueAtTime(randomGain, ctx.currentTime);
-        gainNodeRight.gain.setValueAtTime(randomGain, ctx.currentTime);
-        volCtrl.value = randomGain;
-    }, wobbleIntervalSize);
-}
-
-function stopWobble() {
-    clearInterval(wobbleInterval);
-    wobbleActive = false;
-    intervalSizeInput.classList.add('hidden');
-}
 
 // pan
 const pan = document.getElementById('pan');
@@ -128,18 +83,14 @@ pan.addEventListener('click', () => {
 })
 
 panValueInput.addEventListener('change', (e) => {
-    panValue = e.target.value;
-    if (panValue == 0) {
-        gainNodeLeft.gain.setValueAtTime(gainVal, ctx.currentTime);
-        gainNodeRight.gain.setValueAtTime(gainVal, ctx.currentTime);
-    } else if (panValue < 0) {
-        gainNodeRight.gain.setValueAtTime(gainVal * (1 + parseFloat(panValue)), ctx.currentTime); // decrease right channel gain
-        gainNodeLeft.gain.setValueAtTime(gainVal, ctx.currentTime);
-    } else {
-        gainNodeLeft.gain.setValueAtTime(gainVal * (1 - parseFloat(panValue)), ctx.currentTime); // decrease left channel gain
-        gainNodeRight.gain.setValueAtTime(gainVal, ctx.currentTime);
-    }
-})
+    panValue = parseFloat(e.target.value);
+    setPanning(panValue);
+});
+
+function setPanning(panValue) {
+    panValue = Math.min(1, Math.max(-1, panValue));
+    stereoPanner.pan.setValueAtTime(panValue, ctx.currentTime);
+}
 
 // time stretch
 const stretch = document.getElementById('stretch');

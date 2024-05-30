@@ -18,32 +18,28 @@
                 <rect width="2vw" height="2vw" x="10" y="10" rx="0" ry="0" fill="#F72C25" />
             </svg> 
         </div>
-        <input id="vol-ctrl" name="vol" type="range" min="0" max="1" step="0.01" default="0.50">
+        <input id="vol-ctrl" name="vol" type="range" min="0" max="1" step="0.1" default="0.50">
     </div>
     <div id="main-controls" class="controls">
         <div class="post">
-            <img id="wobble-gain" src="./assets/void1.gif" alt=""> <br>
-            <input id="interval-size" class="hidden" name="int-sz" type="range" min="50" max="2000" step="50" default="500">
+            <img id="pan" src="./assets/void1.gif" alt=""> <br>
+            <input id="pan-val" class="hidden" name="int-sz" type="range" min="-1" max="1" step="0.01" default="0">
         </div>
         <div class="post">
-            <img id="pan" src="./assets/void2.gif" alt=""> <br>
-            <input id="pan-val" class="hidden" name="int-sz" type="range" min="-1" max="1" step="0.1" default="0">
+            <img id="stretch" src="./assets/void2.gif" alt=""> <br>
+            <input id="stretch-val" class="hidden" name="int-sz" type="range" min="0.01" max="2" step="0.01" default="0.01">
         </div>
         <div class="post">
-            <img id="stretch" src="./assets/void3.gif" alt=""> <br>
-            <input id="stretch-val" class="hidden" name="int-sz" type="range" min="0" max="1" step="0.1" default="0">
+            <img id="pitch" src="./assets/void3.gif" alt=""> <br>
+            <input id="pitch-val" class="hidden" name="int-sz" type="range" min="20000" max="40000" step="100" default="30000">
         </div>
         <div class="post">
-            <img id="pitch" src="./assets/void4.gif" alt=""> <br>
-            <input id="pitch-val" class="hidden" name="int-sz" type="range" min="50" max="2000" step="50" default="500">
-        </div>
-        <div class="post">
-            <img id="crush" src="./assets/void5.gif" alt=""> <br>
+            <img id="crush" src="./assets/void4.gif" alt=""> <br>
             <input id="crush-val" class="hidden" name="int-sz" type="range" min="1" max="16" step="1" default="1">
         </div>
         <div class="post">
-            <img id="verb" src="./assets/void6.gif" alt=""> <br>
-            <input id="verb-amount" class="hidden" name="int-sz" type="range" min="50" max="2000" step="50" default="500">
+            <img id="verb" src="./assets/void5.gif" alt=""> <br>
+            <input id="verb-val" class="hidden" name="int-sz" type="range" min="1" max="16" step="1" default="1">
         </div>
     </div>
 </body>
