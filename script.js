@@ -10,63 +10,59 @@ let compressor;
 let bitcrusherGainNode;
 const audioFilePath = './assets/drones.mp3';
 
-async function initialiseSoundSource(audioFilePath) {
-    const response = await fetch(audioFilePath);
-    const arrayBuffer = await response.arrayBuffer();
-    const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
+
+function initialiseSoundSource() {
+    const numChannels = 2;
+    const sampleRate = ctx.sampleRate;
+    const duration = 2;
+    const numFrames = sampleRate * duration;
+
+    const buffer = ctx.createBuffer(numChannels, numFrames, sampleRate);
+
+    for (let channel = 0; channel < numChannels; channel++) {
+        const nowBuffering = buffer.getChannelData(channel);
+        for (let i = 0; i < numFrames; i++) {
+            nowBuffering[i] = Math.random() * 2 - 1; 
+        }
+    }
 
     source = ctx.createBufferSource();
-    source.buffer = audioBuffer;
+    source.buffer = buffer;
     source.loop = true;
 
+    const splitter = ctx.createChannelSplitter(2);
     gainNodeLeft = ctx.createGain();
     gainNodeRight = ctx.createGain();
-    stereoPanner = ctx.createStereoPanner();
+    const merger = ctx.createChannelMerger(2);
 
     filterNode = ctx.createBiquadFilter();
     filterNode.type = 'bandpass';
 
     bitcrusherNode = createBitcrusherNode();
-    
-    bitcrusherGainNode = ctx.createGain();
-    bitcrusherGainNode.gain.setValueAtTime(1, ctx.currentTime);
-
-    compressor = ctx.createDynamicsCompressor();
-    compressor.threshold.setValueAtTime(-40, ctx.currentTime); 
-    compressor.knee.setValueAtTime(30, ctx.currentTime);
-    compressor.ratio.setValueAtTime(12, ctx.currentTime);
-    compressor.attack.setValueAtTime(0.003, ctx.currentTime);
-    compressor.release.setValueAtTime(0.25, ctx.currentTime);
-
-    gainNodeLeft.gain.setValueAtTime(gainVal, ctx.currentTime);
-    gainNodeRight.gain.setValueAtTime(gainVal, ctx.currentTime);
-    stereoPanner.pan.setValueAtTime(0, ctx.currentTime);
-    filterNode.frequency.setValueAtTime(20000, ctx.currentTime);
-
-    const splitter = ctx.createChannelSplitter(2);
-    const merger = ctx.createChannelMerger(2);
 
     source.connect(splitter);
     splitter.connect(gainNodeLeft, 0);
     splitter.connect(gainNodeRight, 1);
     gainNodeLeft.connect(merger, 0, 0);
     gainNodeRight.connect(merger, 0, 1);
-    merger.connect(stereoPanner);
-    stereoPanner.connect(filterNode);
+
+    merger.connect(filterNode);
+
     filterNode.connect(bitcrusherNode);
-    bitcrusherNode.connect(bitcrusherGainNode); 
-    bitcrusherGainNode.connect(compressor); 
-    compressor.connect(ctx.destination);
+
+    bitcrusherNode.connect(ctx.destination);merger.connect(bitcrusherNode);
 
     source.start();
 }
 
 // play
 const playButton = document.getElementById('play-btn');
-playButton.addEventListener('click', async () => {
+playButton.addEventListener('click', () => {
     ctx = new AudioContext();
-    await initialiseSoundSource(audioFilePath);
-});
+    initialiseSoundSource();
+    gainNodeLeft.gain.setValueAtTime(gainVal, ctx.currentTime);
+    gainNodeRight.gain.setValueAtTime(gainVal, ctx.currentTime);
+})
 
 // stop
 const stopButton = document.getElementById('stop-btn');
@@ -216,7 +212,7 @@ randCrush.addEventListener('click', () => {
     if (!randCrushActive) {
         randCrushActive = true;
         crushInterval = setInterval(() => {
-            bitDepth = Math.random() * (16 - 8) + 8;
+            bitDepth = Math.random() * (16 - 12) + 12;
             bitcrushValueInput.value = bitDepth;
         }, 500);
     } else {
